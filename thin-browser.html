@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>F & D Thin Browser</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 24px;
+      color: #111;
+    }
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    input[type="text"] {
+      width: 420px;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    input[type="submit"], button {
+      padding: 10px 16px;
+      font-size: 0.75rem;
+      border: 1px solid #888;
+      border-radius: 4px;
+      background: #f4f4f4;
+      cursor: pointer;
+      margin: 8px 4px;
+    }
+    button:hover, input[type="submit"]:hover {
+      background: #e8e8e8;
+    }
+    .buttons {
+      margin-top: 12px;
+    }
+    .note {
+      margin-top: 16px;
+      font-size: 0.95rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Friends & Dragons Thin Browser</h1>
+    <form id="thin_browser_form">
+      <input placeholder="Paste full URL" id="url_for_thin" name="url_for_thin" type="text" value="">
+    </form>
+
+    <div class="buttons">
+      <button type="button" id="open_left">Open Left Window</button>
+      <button type="button" id="open_mid">Open Mid Window</button>
+      <button type="button" id="open_right">Open Right Window</button>
+    </div>
+
+    <div class="note">
+      Adjust monitor and browser chrome parameters at the top of the script if needed.
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    const DEFAULT_URL = 'https://www.friendsanddragons.com/';
+
+    // Initialize URL input with default value
+    document.addEventListener('DOMContentLoaded', function() {
+      const urlInput = document.getElementById('url_for_thin');
+      if (urlInput.value === '') {
+        urlInput.value = DEFAULT_URL;
+      }
+    });
+
+    const targetUrl = () => document.getElementById('url_for_thin').value || DEFAULT_URL;
+
+    const monitor = {
+      width: window.screen.availWidth,
+      height: window.screen.availHeight,
+      left: window.screen.availLeft || 0,
+      top: window.screen.availTop || 0,
+    };
+
+    const chromeSizes = {
+      topBarHeight: 68,      // browser title bar + tabs + address bar height
+      leftBorderWidth: 0,
+      rightBorderWidth: 0,
+      bottomBarHeight: 8,    // optional bottom taskbar if included in available height
+      scrollBarWidth: 16,    // kept for reference but not subtracted from total width
+    };
+
+    const sizes = {
+      minHeight: 560,
+      gutter: 0,
+    };
+
+    const totalWidth = Math.max(0, monitor.width - sizes.gutter);
+    const basePanelWidth = Math.floor(totalWidth / 3);
+    const remainder = totalWidth - basePanelWidth * 3;
+    const panelWidths = {
+      left: basePanelWidth,
+      mid: basePanelWidth,
+      right: basePanelWidth + remainder,
+    };
+    const panelPositions = {
+      left: monitor.left,
+      mid: monitor.left + panelWidths.left,
+      right: monitor.left + panelWidths.left + panelWidths.mid,
+    };
+
+    const getWindowHeight = () => Math.max(sizes.minHeight, monitor.height - chromeSizes.topBarHeight - chromeSizes.bottomBarHeight);
+
+    function openThinWindow(url, left, width) {
+      const height = getWindowHeight();
+      const winProps = `height=${height},width=${width},left=${left},top=${monitor.top},resizable=1,scrollbars=1,status=0,toolbar=1,location=1,menubar=0`;
+      const newWin = window.open(url, 'aWin-' + left, winProps);
+      if (newWin) {
+        newWin.focus();
+      } else {
+        alert('Popup blocked. Allow popups for this page to open the thin browser window.');
+      }
+    }
+
+    document.getElementById('thin_browser_form').addEventListener('submit', function (event) {
+      event.preventDefault();
+      openThinWindow(targetUrl(), panelPositions.left, panelWidths.left);
+    });
+
+    document.getElementById('open_left').addEventListener('click', function () {
+      openThinWindow(targetUrl(), panelPositions.left, panelWidths.left);
+    });
+
+    document.getElementById('open_mid').addEventListener('click', function () {
+      openThinWindow(targetUrl(), panelPositions.mid, panelWidths.mid);
+    });
+
+    document.getElementById('open_right').addEventListener('click', function () {
+      openThinWindow(targetUrl(), panelPositions.right, panelWidths.right);
+    });
+  </script>
+</body>
+</html>
