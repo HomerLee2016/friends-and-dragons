@@ -90,24 +90,40 @@
       scrollBarWidth: 16,    // kept for reference but not subtracted from total width
     };
 
+    // Small adjustment you can tune to correct left-edge gaps in some setups.
+    // Positive moves panels right; negative moves them left. Edit this value as needed.
+    const ADJUST = {
+      windowMarginPx: 8
+    };
+
     const sizes = {
       minHeight: 560,
       gutter: 0,
     };
 
     const totalWidth = Math.max(0, monitor.width - sizes.gutter);
-    const basePanelWidth = Math.floor(totalWidth / 3);
-    const remainder = totalWidth - basePanelWidth * 3;
+    const marginPx = typeof ADJUST.windowMarginPx === 'number' ? ADJUST.windowMarginPx : 0;
+    const availableWidth = Math.max(0, totalWidth - (marginPx * 2)); // 8px left + 8px right padding
+    const basePanelWidth = Math.floor(availableWidth / 3);
+    const remainder = availableWidth - basePanelWidth * 3;
     const panelWidths = {
       left: basePanelWidth,
       mid: basePanelWidth,
       right: basePanelWidth + remainder,
     };
+    const adjustedLeft = Math.round(monitor.left || 0);
+
     const panelPositions = {
-      left: monitor.left,
-      mid: monitor.left + panelWidths.left,
-      right: monitor.left + panelWidths.left + panelWidths.mid,
+      left: adjustedLeft,
+      mid: adjustedLeft + panelWidths.left,
+      right: adjustedLeft + panelWidths.left + panelWidths.mid,
     };
+
+    // Debug: log positions to browser console
+    console.log('Monitor:', monitor);
+    console.log('Panel widths:', panelWidths);
+    console.log('ADJUST:', ADJUST);
+    console.log('Panel positions:', panelPositions);
 
     const getWindowHeight = () => Math.max(sizes.minHeight, monitor.height - chromeSizes.topBarHeight - chromeSizes.bottomBarHeight);
 
